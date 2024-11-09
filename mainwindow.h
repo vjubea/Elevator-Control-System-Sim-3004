@@ -6,7 +6,10 @@
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QLabel>
-#include <vector>
+class ECS;
+class FloorList;
+class Floor;
+class PassengerList;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,14 +27,23 @@ private:
     Ui::MainWindow *ui;
     QPushButton *startButton;
     QLineEdit *passengerNameInput;
+    QLineEdit *passengerWeightInput;
     QLineEdit *startFloorInput;
     QLineEdit *destinationFloorInput;
+    QLineEdit *pressFloorButTimeInput;
+    QLineEdit *pressOpenTimeInput;
+    QLineEdit *pressCloseTimeInput;
+    QLineEdit *pressHelpTimeInput;
+    QLineEdit *passengerNumObstructsInput;
     QPushButton *addPassengerButton;
     std::vector<QLabel*> elevatorStateLabels;
     QTextEdit *passengerListDisplay;
-    QStringList passengers;
+    ECS* ecs;
+    PassengerList* passengers;
+    FloorList* floorList;
+    Floor* startFloor;
 
-    void startSimulation();
+    void startSimulation(PassengerList*);
     void updateUI();
 
 private slots:

@@ -18,7 +18,6 @@ class PassengerList
         int getNumPassengers();
         float get_total_weight();
 
-
     private:
         int numPassengers;
         Passenger* passengers[PASSENGER_CAP]; 

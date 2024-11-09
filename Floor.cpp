@@ -48,7 +48,7 @@ void Floor::floor_button_off(string dir) {
         floorButtons[1]->switch_off();
 }
 
-void Floor::detect_me(Elevator* el) {
+void Floor::detect_me(Elevator* el, int* timestep) {
     cout << "Floor #" << floorNum << " detected Elevator Car #"
          << el->getCarNum() << ".\n" << endl;
 
@@ -71,7 +71,7 @@ void Floor::detect_me(Elevator* el) {
         waitingForDown = false;
         floor_button_off(DOWN);
     }
-    el->reached_new_floor(this);
+    el->reached_new_floor(this, timestep);
 }
 
 Elevator* Floor::get_corresponding_el(string passengerDir) {
@@ -83,4 +83,5 @@ Elevator* Floor::get_corresponding_el(string passengerDir) {
     return nullptr;
 }
 int Floor::getFloorNum() { return floorNum; }
+int Floor::getNumPassengers() { return passengers->getNumPassengers(); }
 PassengerList* Floor::getPassengers() { return passengers; }
