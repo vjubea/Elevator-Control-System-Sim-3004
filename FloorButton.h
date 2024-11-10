@@ -14,10 +14,11 @@ class FloorButton
 
         void switch_on();
         void switch_off();
+        bool isOn();
 
     private:
         string direction;
-        bool isOn;
+        bool on;
         int floorNum;
 };
 #endif

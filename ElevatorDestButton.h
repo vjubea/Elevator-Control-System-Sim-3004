@@ -11,14 +11,14 @@ class ElevatorDestButton
         ElevatorDestButton(int, int);
         ~ElevatorDestButton();
 
-        void on();
-        void off();
+        void turn_on();
+        void turn_off();
         int getFloorNum();
-        bool getState();
+        bool isOn();
 
     private:
         int floorNum;
         int elNum;
-        bool isOn;
+        bool on;
 };
 #endif

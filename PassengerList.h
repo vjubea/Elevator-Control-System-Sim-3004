@@ -20,6 +20,6 @@ class PassengerList
 
     private:
         int numPassengers;
-        Passenger* passengers[PASSENGER_CAP]; 
+        Passenger* passengers[PASSENGER_CAP];
 };
 #endif

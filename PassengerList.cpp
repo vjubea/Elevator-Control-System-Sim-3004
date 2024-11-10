@@ -11,7 +11,8 @@ PassengerList::~PassengerList() {}
 
 void PassengerList::add_passenger(Passenger* p) {
     if (numPassengers < PASSENGER_CAP) {
-        passengers[numPassengers++] = p;
+        passengers[numPassengers] = p;
+        numPassengers++;
     }
 }
 void PassengerList::remove_passenger(Passenger* p) {

@@ -15,20 +15,21 @@ class Elevator
         Elevator(int, Floor*);
         ~Elevator();
         
-        bool add_passenger(Passenger*, int*);
+        bool add_passenger(Passenger*, int);
         void remove_passenger(Passenger*);
-        bool ready_to_move(int, int*);
-        void reached_new_floor(Floor*, int*);
-        void new_request(int, string);
+        bool make_decision();
+        bool ready_to_move(int, int);
+        void reached_floor(Floor*, int);
+        void new_request(int);
         void update_to(int);
-        void stop(int*);
-        void open_door(int*);
-        void close_door(int, int*);
+        void stop();
+        void open_door(int);
+        void close_door(int, int);
         void dest_button_pressed(int);
-        bool contact_building_safety(int*);
-        void help_button_pressed(int*);
-        bool overload_detected(int*);
-        bool obstacle_detected(int*);
+        bool contact_building_safety(int);
+        void help_button_pressed(int);
+        bool overload_detected(int);
+        bool obstacle_detected(int);
         void move_to_safe_floor();
 
         Floor* getCurrFloor();

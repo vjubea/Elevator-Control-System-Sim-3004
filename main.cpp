@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QLocale>
-#include <QTranslator>
 using namespace std;
 
 

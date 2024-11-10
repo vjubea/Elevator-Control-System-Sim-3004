@@ -1,24 +1,24 @@
 #include "ElevatorDestButton.h"
 
-ElevatorDestButton::ElevatorDestButton(int floorN, int elN) {
+ElevatorDestButton::ElevatorDestButton(int floorN, int carNum) {
     floorNum = floorN;
-    elNum = elN;
-    isOn = false;
+    elNum = carNum;
+    on = false;
 }
 ElevatorDestButton::~ElevatorDestButton() {}
 
-void ElevatorDestButton::on() {
+void ElevatorDestButton::turn_on() {
     cout << "Floor #" << floorNum
     << " Destination Button is toggled ON in Elevator #"<< elNum
     << ".\n" << endl;
-    isOn = true;
+    on = true;
 }
-void ElevatorDestButton::off() {
+void ElevatorDestButton::turn_off() {
     cout << "Floor #" << floorNum
     << " Destination Button is toggled OFF in Elevator #"<< elNum
     << ".\n" << endl;
-    isOn = false;
+    on = false;
 }
 
 int ElevatorDestButton::getFloorNum() { return floorNum; }
-bool ElevatorDestButton::getState() { return isOn; }
+bool ElevatorDestButton::isOn() { return on; }

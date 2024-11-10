@@ -13,12 +13,12 @@ ElevatorDisplay::~ElevatorDisplay() {}
 
 // Button Interactions
 void ElevatorDisplay::dest_button_pressed(int num) {
-    if (0 < num && num <= FLOOR_COUNT)
-        elButton[num]->on();
+    if (1 < num && num <= FLOOR_COUNT)
+        elButton[num-1]->turn_on();
 }
 void ElevatorDisplay::dest_button_off(int num) {
     if (0 < num && num <= FLOOR_COUNT)
-        elButton[num]->off();
+        elButton[num]->turn_off();
 }
 void ElevatorDisplay::toggle_help_button() {
     cout << "Help Button TURNS ON in Elevator #"
@@ -46,6 +46,6 @@ int ElevatorDisplay::getCurrFloor() { return currFloorNum; }
 string ElevatorDisplay::getCurrDir() { return currDirection; }
 bool ElevatorDisplay::isDestButtonOn(int num) {
     if (0 < num && num <= FLOOR_COUNT)
-       return elButton[num]->getState();
+       return elButton[num]->isOn();
     return false;
 }
