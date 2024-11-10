@@ -39,8 +39,8 @@ void Elevator::remove_passenger(Passenger* p) {
 
 void Elevator::new_request(int floorNum) {
     floorRequests->add_request(floorNum);
+    int currFloorNum = getCurrFloor()->getFloorNum();
     if (currDirection == IDLE) {
-        int currFloorNum = getCurrFloor()->getFloorNum();
         if (currFloorNum < floorNum)
             currDirection = UP;
         else if (floorNum < currFloorNum)
@@ -48,7 +48,6 @@ void Elevator::new_request(int floorNum) {
     }
 }
 void Elevator::dest_button_pressed(int destFloorNum) {
-    string direction = IDLE;
     display->dest_button_pressed(destFloorNum);
     new_request(destFloorNum);
 }
@@ -81,6 +80,9 @@ bool Elevator::ready_to_move(int numObs, int timestep) {
 
 void Elevator::reached_floor(Floor* fl, int timestep) {
     // Elevator can access next floor
+    if (currFloor->getFloorNum() != fl->getFloorNum())
+        cout << "Elevator #" << carNum << " moved from Floor #" << currFloor->getFloorNum()
+             << " to Floor #" << fl->getFloorNum() << ".\n" << endl;
     currFloor = fl;
     update_to(fl->getFloorNum());
 

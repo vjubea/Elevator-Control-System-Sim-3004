@@ -1,9 +1,9 @@
 #include "FloorButton.h"
 
 FloorButton::FloorButton(int flNum, string dir) {
+    floorNum = flNum;
     direction = dir;
     on = false;
-    floorNum = flNum;
 }
 FloorButton::~FloorButton() {}
 

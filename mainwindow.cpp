@@ -51,6 +51,17 @@ MainWindow::MainWindow(QWidget *parent) // Put other input in here
     passengerNumObstructsInput->setFixedWidth(INPUT_FIELD_WIDTH);
     addPassengerButton->setFixedWidth(INPUT_FIELD_WIDTH);
 
+    // Setup Floors, ECS and PassengeList
+    ecs = new ECS();
+    floorList = new FloorList();
+    for (int i = 0; i < FLOOR_COUNT; i++)
+        floorList->add_floor(new Floor(i, ecs));
+    passengers = new PassengerList();
+
+    startFloor = floorList->get(START_FLOOR_IND);
+    // Initializes elevators with their start floor
+    ecs->set_elevator_start_floor(ELEVATOR_COUNT, startFloor);
+    updateUI();
     // Layout
     QVBoxLayout *layout = new QVBoxLayout;
     // Passenger Inputs
@@ -68,17 +79,6 @@ MainWindow::MainWindow(QWidget *parent) // Put other input in here
     layout->addWidget(passengerListDisplay);
     layout->addWidget(simulationLogs);
     layout->addWidget(startButton);
-
-    // Setup Floors, ECS and PassengeList
-    ecs = new ECS();
-    floorList = new FloorList();
-    for (int i = 0; i < FLOOR_COUNT; i++)
-        floorList->add_floor(new Floor(i, ecs));
-    passengers = new PassengerList();
-
-    startFloor = floorList->get(START_FLOOR_IND);
-    // Initializes elevators with their start floor
-    ecs->set_elevator_start_floor(ELEVATOR_COUNT, startFloor);
 
     QWidget *centralWidget = new QWidget(this);
     centralWidget->setLayout(layout);
@@ -177,7 +177,7 @@ void MainWindow::updateUI() {
         Elevator* el = ecs->getElevator(i);
         QString elevatorInfo =
                 "Elevator # " + QString::number(el->getCarNum()) +
-                " | Curr Floor # " + QString::number(el->getCarNum()) +
+                " | Curr Floor # " + QString::number(el->getCurrFloor()->getFloorNum()) +
                 " | State: " +
                 (el->getCurrDirection() != IDLE ? "Moving " + QString::fromStdString(el->getCurrDirection()): "IDLE");
         simulationLogs->append(elevatorInfo);
@@ -253,6 +253,7 @@ void MainWindow::startSimulation() {
                 // Checks current elevator passengers
                 nextUnboarding = el->getPassengers()->get_next_unboarding(elCurrFloor->getFloorNum());
                 if (nextUnboarding != nullptr) {
+                    // Issue happens after
                     nextUnboarding->unboard_elevator(timestep);
                 }
             } while (nextUnboarding != nullptr);

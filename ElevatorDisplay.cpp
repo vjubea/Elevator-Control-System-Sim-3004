@@ -18,7 +18,7 @@ void ElevatorDisplay::dest_button_pressed(int num) {
 }
 void ElevatorDisplay::dest_button_off(int num) {
     if (0 < num && num <= FLOOR_COUNT)
-        elButton[num]->turn_off();
+        elButton[num-1]->turn_off();
 }
 void ElevatorDisplay::toggle_help_button() {
     cout << "Help Button TURNS ON in Elevator #"

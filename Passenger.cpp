@@ -29,11 +29,11 @@ Passenger::~Passenger() {}
 bool Passenger::press_floor_button(int timestep) {
     // Checks if passenger is on a Floor
     if (floor != nullptr) {
-        cout << name << " on Floor #" << floor->getFloorNum() << " pressed "
-        << heading << " Floor Button at timestep " << timestep
-        << ".\n" << endl;
+        cout << name << " pressed the Floor Button " << heading
+             << " on Floor #" << floor->getFloorNum()
+             << " at timestep " << timestep << ".\n" << endl;
         
-        floor->handle_floor_button(heading, timestep);
+        floor->handle_floor_button(heading);
         return true;
     }
     return false;
@@ -108,14 +108,15 @@ void Passenger::board_elevator(int timestep) {
 void Passenger::unboard_elevator(int timestep) {
     // Handles whole unboarding process
     if (elevator != nullptr) {
-        cout << name << " unboards Elevator #" << elevator->getCarNum()
-             << "and reached Floor #" << floor->getFloorNum()
-             << " at timestep " << timestep << ".\n" << endl;
-
         Floor* elCurrFloor = elevator->getCurrFloor();
-        if (elCurrFloor == nullptr) return;
+        // elCurrFloor has ECS with 7 elevators
+        int elCurrFloorNum = elCurrFloor->getFloorNum();
         // Ensures passenger is unboarding at the right Floor
-        if (destinedFloor == elCurrFloor->getFloorNum()) {
+        if (destinedFloor == elCurrFloorNum) {
+            cout << name << " unboards Elevator #" << elevator->getCarNum()
+                 << " and reached Floor #" << elCurrFloor->getFloorNum()
+                 << " at timestep " << timestep << ".\n" << endl;
+
             elCurrFloor->add_passenger(this);
             floor = elCurrFloor;
             elevator->remove_passenger(this);
