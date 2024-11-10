@@ -31,7 +31,7 @@ bool Passenger::press_floor_button(int timestep) {
     if (floor != nullptr) {
         cout << name << " pressed the Floor Button " << heading
              << " on Floor #" << floor->getFloorNum()
-             << " at timestep " << timestep << ".\n" << endl;
+             << " at [timestep : " << timestep << "].\n" << endl;
         
         floor->handle_floor_button(heading);
         return true;
@@ -41,8 +41,8 @@ bool Passenger::press_floor_button(int timestep) {
 bool Passenger::press_dest_button(int timestep) {
     // Checks if passenger is in Elevator
     if (elevator != nullptr) {
-        cout << name << " pressed Dest Button " << destinedFloor
-        << " at timestep " << timestep << ".\n" << endl;
+        cout << name << " pressed DESTINATION Button #" << destinedFloor
+        << " at [timestep : " << timestep << "].\n" << endl;
 
         elevator -> dest_button_pressed(destinedFloor);
         return true;
@@ -53,7 +53,7 @@ bool Passenger::press_open_door_button(int timestep) {
     // Checks if passenger is in Elevator
     if (elevator != nullptr) {
         cout << name << " pressed OPEN DOOR Button in Elevator #" 
-        << elevator->getCarNum() << " at timestep " << timestep << ".\n" << endl;
+        << elevator->getCarNum() << " at [timestep : " << timestep << "].\n" << endl;
         
         elevator -> open_door(timestep);
         return true;
@@ -64,7 +64,7 @@ bool Passenger::press_close_door_button(int timestep) {
     // Checks if passenger is in Elevator
     if (elevator != nullptr) {
         cout << name << " pressed CLOSE DOOR Button in Elevator #" 
-        << elevator->getCarNum() << " at timestep " << timestep << ".\n" << endl;
+        << elevator->getCarNum() << " at [timestep : " << timestep << "].\n" << endl;
         
         elevator->ready_to_move(0, timestep);
         return true;
@@ -75,7 +75,7 @@ bool Passenger::press_help_button(int timestep) {
     // Checks if passenger is in Elevator
     if (elevator != nullptr) {
         cout << name << " pressed HELP Button in Elevator #"
-        << elevator->getCarNum() << " at timestep " << timestep << ".\n" << endl;
+        << elevator->getCarNum() << " at [timestep : " << timestep << "].\n" << endl;
 
         elevator -> help_button_pressed(timestep);
         return true;
@@ -88,7 +88,7 @@ void Passenger::board_elevator(int timestep) {
     Elevator* el = floor->get_corresponding_el(heading);
     if (el != nullptr) {
         cout << name << " is boarding Elevator #" << el->getCarNum()
-             << " at timestep " << timestep << ".\n" << endl;
+             << " at [timestep : " << timestep << "].\n" << endl;
 
         //Elevator checks if passenger was added
         if (el->add_passenger(this, timestep) == true) {
@@ -104,6 +104,10 @@ void Passenger::board_elevator(int timestep) {
                  << " because of OVERLOAD.\n" << endl;
         }
     }
+    else {
+        cout << name << " is waiting for another Elevator"
+             << " at [timestep : " << timestep << "].\n" << endl;
+    }
 }
 void Passenger::unboard_elevator(int timestep) {
     // Handles whole unboarding process
@@ -115,7 +119,7 @@ void Passenger::unboard_elevator(int timestep) {
         if (destinedFloor == elCurrFloorNum) {
             cout << name << " unboards Elevator #" << elevator->getCarNum()
                  << " and reached Floor #" << elCurrFloor->getFloorNum()
-                 << " at timestep " << timestep << ".\n" << endl;
+                 << " at [timestep : " << timestep << "].\n" << endl;
 
             elCurrFloor->add_passenger(this);
             floor = elCurrFloor;
@@ -123,8 +127,8 @@ void Passenger::unboard_elevator(int timestep) {
             elevator = nullptr;
 
             heading = REACHED_DEST;
-            cout << name << " REACHED THEIR DESTINATION at timestep "
-                 << timestep << "\n" << endl;
+            cout << name << " REACHED THEIR DESTINATION"
+                 << " at [timestep : " << timestep << "].\n" << endl;
         }
     }
 }

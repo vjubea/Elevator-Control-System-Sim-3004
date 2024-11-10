@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QLabel>
+#include <QTimer>
 class ECS;
 class FloorList;
 class Floor;
@@ -28,7 +29,7 @@ private:
     QPushButton *startButton;
     QPushButton *addPassengerButton;
     QTextEdit *passengerListDisplay;
-    QTextEdit *simulationLogs;
+    QTextEdit *elevatorDisplay;
 
     QLineEdit *passengerNameInput;
     QLineEdit *passengerWeightInput;
@@ -39,18 +40,24 @@ private:
     QLineEdit *pressCloseTimeInput;
     QLineEdit *pressHelpTimeInput;
     QLineEdit *passengerNumObstructsInput;
+    QWidget *centralWidget;
 
     ECS* ecs;
     PassengerList* passengers;
     FloorList* floorList;
     Floor* startFloor;
 
-    void allow_passenger_action(PassengerList*, int);
-    void startSimulation();
+    QTimer *timer;
+    int timestep;;
+
+    void allow_passenger_action(PassengerList*, int&);
+    void simulateElMovement(ECS*, FloorList*, int&);
+    void simulateElBoardUnboard(ECS*, int&);
     void updateUI();
 
 private slots:
     void on_startButton_clicked();
     void on_addPassengerButton_clicked();
+    void updateSimulation();
 };
 #endif // MAINWINDOW_H

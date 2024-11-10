@@ -80,11 +80,7 @@ bool Elevator::ready_to_move(int numObs, int timestep) {
 
 void Elevator::reached_floor(Floor* fl, int timestep) {
     // Elevator can access next floor
-    if (currFloor->getFloorNum() != fl->getFloorNum())
-        cout << "Elevator #" << carNum << " moved from Floor #" << currFloor->getFloorNum()
-             << " to Floor #" << fl->getFloorNum() << ".\n" << endl;
     currFloor = fl;
-    update_to(fl->getFloorNum());
 
     // Finds the floor number of the request being served
     int reqFloorNum = floorRequests->
@@ -92,7 +88,12 @@ void Elevator::reached_floor(Floor* fl, int timestep) {
 
     // Checks if a destined floor was reached
     if (currFloor->getFloorNum() == reqFloorNum) {
-        if (currDirection != IDLE) {
+        if (currFloor->getFloorNum() != fl->getFloorNum()) {
+
+            cout << "Elevator #" << carNum << " moved from Floor #" << currFloor->getFloorNum()
+                 << " to Floor #" << fl->getFloorNum() << ".\n" << endl;
+            
+            update_to(fl->getFloorNum());
             display->dest_button_off(reqFloorNum);
             stop();
         }
@@ -119,8 +120,8 @@ void Elevator::open_door(int timestep) {
     if (!isMoving) {
         bell->ring();
         door->open();
-        cout << "Elevator #" << carNum << " OPENED ITS DOOR at timestep "
-             << timestep <<".\n" << endl;
+        cout << "Elevator #" << carNum << " OPENED ITS DOOR at [timestep : "
+             << timestep << "].\n" << endl;
     }
 }
 void Elevator::close_door(int numObs, int timestep) {
@@ -154,11 +155,13 @@ void Elevator::move_to_safe_floor() {
 
 bool Elevator::contact_building_safety(int timestep) {
     cout << "Elevator CONTACTED Building Safety"
-        << " at timestep " << timestep <<".\n" << endl;
+        << " at [timestep : " << timestep <<"].\n" << endl;
     return true;
 }
 void Elevator::help_button_pressed(int timestep) {
-    cout << "Elevator #" << carNum << " is handling help request.\n" << endl;
+    cout << "A passenger CLICKED the HELP Button" 
+         << " at [timestep : " << timestep <<"].\n"
+         << "Elevator #" << carNum << " is now handling HELP request.\n" << endl;
     
     if (contact_building_safety(timestep) == true) {
         cout << "Building Safety responded to the request.\n" << endl;
@@ -167,7 +170,7 @@ void Elevator::help_button_pressed(int timestep) {
 bool Elevator::overload_detected(int timestep) {
     if (getCurrWeight() >= maxWeight) {
         cout << "OVERLOAD DETECTED in Elevator #" << carNum
-             << " at timestep " << timestep << ".\n" << endl;
+             << " at [timestep : " << timestep << "].\n" << endl;
         display->display_text(OVERLOAD_DETECTED_WARNING);
         display->play_dialog(OVERLOAD_DETECTED_WARNING);
         return true;
@@ -176,7 +179,7 @@ bool Elevator::overload_detected(int timestep) {
 }
 bool Elevator::obstacle_detected(int timestep) {
     cout << "DOOR OBSTACLE DETECTED in Elevator #" << carNum
-         << " at timestep " << timestep <<".\n" << endl;
+         << " at [timestep : " << timestep <<"].\n" << endl;
     open_door(timestep);
     display->display_text(DOOR_OBST_DETECTED_WARNING);
     display->play_dialog(DOOR_OBST_DETECTED_WARNING);
