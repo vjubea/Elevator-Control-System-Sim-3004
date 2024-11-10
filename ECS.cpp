@@ -1,34 +1,50 @@
 #include "ECS.h"
 
-ECS::ECS(int numEls, Floor* initFloor) : underPowerOut(false) {
-    numElevators = numEls;
-    if (initFloor != nullptr) {
-        for (int i = 0; i < numElevators; i++) {
-            elevators[i] = new Elevator(i, initFloor);
-        }
-    }
-}
+ECS::ECS() : underPowerOut(false) {}
 ECS::~ECS() {
     for (int i = 0; i<ELEVATOR_COUNT; i++) {
         delete elevators[i];
         numElevators--;
     }
 }
+void ECS::set_elevator_start_floor(int numEls, Floor* initFloor) {
+    if (initFloor != nullptr) {
+        for (int i = 0; i < numEls; i++) {
+            elevators[i] = new Elevator(i, initFloor);
+            numElevators++;
+        }
+    }
+}
 
-void ECS::serve_request(int reqFloorNum, string dir) {
-    if (reqFloorNum < 0 || FLOOR_COUNT <= reqFloorNum)
+void ECS::serve_request(int reqFloorNum, int timestep) {
+    if (reqFloorNum < 0 || FLOOR_COUNT < reqFloorNum)
         return;
     
     // Decide which car should serve floor request
     bool served = false;
-    for (int i = 0; i<ELEVATOR_COUNT; i++) {
-        if (dir == elevators[i]->getCurrDirection()) {
-            elevators[i]->new_request(reqFloorNum, dir);
+    for (int i = 0; i < numElevators; i++) {
+        Elevator* el = getElevator(i);
+        int elCurrFloorNum = el->getCurrFloor()->getFloorNum();
+        string elCurrDir = el->getCurrDirection();
+
+        if (elCurrDir == IDLE) {
+            getElevator(i)->new_request(reqFloorNum);
             served = true;
+            break;
+        }
+        else if (elCurrFloorNum < reqFloorNum && el->getCurrDirection() == UP) {
+            getElevator(i)->new_request(reqFloorNum);
+            served = true;
+            break;
+        }
+        else if (reqFloorNum < elCurrFloorNum && el->getCurrDirection() == DOWN) {
+            getElevator(i)->new_request(reqFloorNum);
+            served = true;
+            break;
         }
     }
-    if (!served && numElevators > 0) {
-        elevators[0]->new_request(reqFloorNum, dir);
+    if (!served && numElevators >= 1) {
+        getElevator(0)->new_request(reqFloorNum);
     }
 }
 

@@ -2,21 +2,24 @@
 #include "ECS.h"
 using namespace std;
 
-Floor::Floor(int num) {
-    floorNum = num;
+Floor::Floor(int num, ECS* elCtrlSys) {
+    floorNum = num+1;
     pending = waitingForDown = waitingForUp = false;
     floorButtons[0] = new FloorButton(floorNum, UP);
     floorButtons[1] = new FloorButton(floorNum, DOWN);
     passengers = new PassengerList();
+    ecs = elCtrlSys;
 }
 Floor::~Floor() {}
 
-void Floor::handle_floor_button(string dir) {
+void Floor::handle_floor_button(string dir, int timestep) {
     if (dir == UP)
         floorButtons[0]->switch_on();
     else if (dir == DOWN)
         floorButtons[1]->switch_on();
-    ecs->serve_request(floorNum, dir); // Adds actual request
+
+    set_waiting_dir(dir);
+    ecs->serve_request(floorNum, timestep); // Adds actual request
 }
 
 void Floor::add_passenger(Passenger* p) {
@@ -48,8 +51,8 @@ void Floor::floor_button_off(string dir) {
         floorButtons[1]->switch_off();
 }
 
-void Floor::detect_me(Elevator* el, int* timestep) {
-    cout << "Floor #" << floorNum << " detected Elevator Car #"
+void Floor::detect_me(Elevator* el, int timestep) {
+    cout << "Floor #" << floorNum << " SENSORS detected Elevator Car #"
          << el->getCarNum() << ".\n" << endl;
 
     // Checks for bottom/top floor
@@ -71,13 +74,18 @@ void Floor::detect_me(Elevator* el, int* timestep) {
         waitingForDown = false;
         floor_button_off(DOWN);
     }
-    el->reached_new_floor(this, timestep);
+    if (!floorButtons[0]->isOn() && !floorButtons[1]->isOn())
+        pending = false;
+
+    el->reached_floor(this, timestep);
 }
 
 Elevator* Floor::get_corresponding_el(string passengerDir) {
     for (int i = 0; i < ELEVATOR_COUNT; i++) {
         Elevator* currEl = ecs->getElevator(i);
         if (currEl->getCurrDirection() == passengerDir)
+            return currEl;
+        else if (currEl->getCurrDirection() == IDLE)
             return currEl;
     }
     return nullptr;

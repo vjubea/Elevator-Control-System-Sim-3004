@@ -26,6 +26,10 @@ public:
 private:
     Ui::MainWindow *ui;
     QPushButton *startButton;
+    QPushButton *addPassengerButton;
+    QTextEdit *passengerListDisplay;
+    QTextEdit *simulationLogs;
+
     QLineEdit *passengerNameInput;
     QLineEdit *passengerWeightInput;
     QLineEdit *startFloorInput;
@@ -35,15 +39,14 @@ private:
     QLineEdit *pressCloseTimeInput;
     QLineEdit *pressHelpTimeInput;
     QLineEdit *passengerNumObstructsInput;
-    QPushButton *addPassengerButton;
-    std::vector<QLabel*> elevatorStateLabels;
-    QTextEdit *passengerListDisplay;
+
     ECS* ecs;
     PassengerList* passengers;
     FloorList* floorList;
     Floor* startFloor;
 
-    void startSimulation(PassengerList*);
+    void allow_passenger_action(PassengerList*, int);
+    void startSimulation();
     void updateUI();
 
 private slots:

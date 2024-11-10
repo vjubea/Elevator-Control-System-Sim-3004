@@ -2,7 +2,7 @@
 
 FloorButton::FloorButton(int flNum, string dir) {
     direction = dir;
-    isOn = false;
+    on = false;
     floorNum = flNum;
 }
 FloorButton::~FloorButton() {}
@@ -10,10 +10,12 @@ FloorButton::~FloorButton() {}
 void FloorButton::switch_on() {
     cout << direction << " Button " << "has lit up on Floor #" 
     << floorNum << ".\n" << endl;
-    isOn = true;
+    on = true;
 }
 void FloorButton::switch_off() {
     cout << direction << " Button " << "has turned off on Floor #" 
     << floorNum << ".\n" << endl;
-    isOn = false;
+    on = false;
 }
+
+bool FloorButton::isOn() { return on; }

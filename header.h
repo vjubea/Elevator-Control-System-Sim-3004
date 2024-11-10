@@ -1,12 +1,14 @@
 #ifndef HEADER_H
 #define HEADER_H
 
+#define INPUT_FIELD_WIDTH 150
+
 #define ELEVATOR_COUNT 2
 #define PASSENGER_CAP 4
 #define FLOOR_COUNT 5
 #define ELEV_MAX_WEIGHT 360
 #define START_FLOOR_IND 0
-#define NONE -1
+#define NONE 0
 
 #define UP "UP"
 #define DOWN "DOWN"
