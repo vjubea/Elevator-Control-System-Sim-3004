@@ -3,6 +3,9 @@
 using namespace std;
 
 Floor::Floor(int num, ECS* elCtrlSys) {
+    if (elCtrlSys == nullptr) {
+        throw invalid_argument("ECS pointer cannot be null.");
+    }
     floorNum = num+1;
     pending = waitingForDown = waitingForUp = false;
     floorButtons[0] = new FloorButton(floorNum, UP);
@@ -12,14 +15,14 @@ Floor::Floor(int num, ECS* elCtrlSys) {
 }
 Floor::~Floor() {}
 
-void Floor::handle_floor_button(string dir, int timestep) {
+void Floor::handle_floor_button(string dir) {
     if (dir == UP)
         floorButtons[0]->switch_on();
     else if (dir == DOWN)
         floorButtons[1]->switch_on();
 
     set_waiting_dir(dir);
-    ecs->serve_request(floorNum, timestep); // Adds actual request
+    ecs->serve_request(floorNum); // Adds actual request
 }
 
 void Floor::add_passenger(Passenger* p) {
@@ -83,7 +86,9 @@ void Floor::detect_me(Elevator* el, int timestep) {
 Elevator* Floor::get_corresponding_el(string passengerDir) {
     for (int i = 0; i < ELEVATOR_COUNT; i++) {
         Elevator* currEl = ecs->getElevator(i);
-        if (currEl->getCurrDirection() == passengerDir)
+        if (currEl == nullptr)
+            continue; // Skip invalid elevators
+        else if (currEl->getCurrDirection() == passengerDir)
             return currEl;
         else if (currEl->getCurrDirection() == IDLE)
             return currEl;

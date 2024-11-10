@@ -13,7 +13,7 @@ class ECS
         ECS();
         ~ECS();
         void set_elevator_start_floor(int, Floor*);
-        void serve_request(int, int);
+        void serve_request(int);
         void detect_power_out();
         void detect_fire();
         bool contact_building_safety(int);

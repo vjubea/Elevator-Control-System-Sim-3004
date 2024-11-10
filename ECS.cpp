@@ -1,6 +1,10 @@
 #include "ECS.h"
 
-ECS::ECS() : underPowerOut(false) {}
+ECS::ECS() : underPowerOut(false), numElevators(0) {
+    for (int i = 0; i < ELEVATOR_COUNT; i++) {
+        elevators[i] = nullptr;
+    }
+}
 ECS::~ECS() {
     for (int i = 0; i<ELEVATOR_COUNT; i++) {
         delete elevators[i];
@@ -16,7 +20,7 @@ void ECS::set_elevator_start_floor(int numEls, Floor* initFloor) {
     }
 }
 
-void ECS::serve_request(int reqFloorNum, int timestep) {
+void ECS::serve_request(int reqFloorNum) {
     if (reqFloorNum < 0 || FLOOR_COUNT < reqFloorNum)
         return;
     

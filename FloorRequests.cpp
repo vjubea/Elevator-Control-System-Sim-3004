@@ -1,6 +1,10 @@
 #include "FloorRequests.h"
 
-FloorRequests::FloorRequests() : numRequests(0) {}
+FloorRequests::FloorRequests() : numRequests(0) {
+    for (int i = 0; i < FLOOR_COUNT; i++) {
+        requests[i] = 0;
+    }
+}
 FloorRequests::~FloorRequests() {}
 
 void FloorRequests::add_request(int floorNum) {

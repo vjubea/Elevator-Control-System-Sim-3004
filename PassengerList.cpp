@@ -56,6 +56,7 @@ Passenger* PassengerList::get_next_unboarding(int currFloor) {
     }
     return nullptr;
 }
+
 int PassengerList::getNumPassengers() { return numPassengers; }
 
 float PassengerList::get_total_weight() {
