@@ -8,15 +8,15 @@ Passenger::Passenger(string n, float weight, Floor* startFloor, int destFloor,
     name = n;
     totalWeight = weight;
     destinedFloor = destFloor;
+    floor = startFloor;
 
-    if (destFloor > startFloor->getFloorNum())
+    if (destFloor > floor->getFloorNum())
         heading = UP;
-    else if (destFloor < startFloor->getFloorNum())
+    else if (destFloor < floor->getFloorNum())
         heading = DOWN;
     else
         heading = REACHED_DEST;
 
-    floor = startFloor;
     elevator = nullptr;
 
     // Set timings and obstructions
@@ -26,7 +26,10 @@ Passenger::Passenger(string n, float weight, Floor* startFloor, int destFloor,
     pressHelpT = helpT;
     numObstructs = numObs;
 }
-Passenger::~Passenger() {}
+Passenger::~Passenger() {
+    floor = nullptr;
+    elevator = nullptr;
+}
 
 bool Passenger::press_floor_button(int timestep) {
     // Checks if passenger is on a Floor
@@ -34,7 +37,7 @@ bool Passenger::press_floor_button(int timestep) {
         cout << name << " pressed the Floor Button " << heading
              << " on Floor #" << floor->getFloorNum()
              << " at [timestep : " << timestep << "].\n" << endl;
-        
+
         floor->handle_floor_button(heading);
         return true;
     }
@@ -54,9 +57,9 @@ bool Passenger::press_dest_button(int timestep) {
 bool Passenger::press_open_door_button(int timestep) {
     // Checks if passenger is in Elevator
     if (elevator != nullptr) {
-        cout << name << " pressed OPEN DOOR Button in Elevator #" 
+        cout << name << " pressed OPEN DOOR Button in Elevator #"
         << elevator->getCarNum() << " at [timestep : " << timestep << "].\n" << endl;
-        
+
         elevator -> open_door(timestep);
         return true;
     }
@@ -65,9 +68,10 @@ bool Passenger::press_open_door_button(int timestep) {
 bool Passenger::press_close_door_button(int timestep) {
     // Checks if passenger is in Elevator
     if (elevator != nullptr) {
-        cout << name << " pressed CLOSE DOOR Button in Elevator #" 
+        cout << name << " pressed CLOSE DOOR Button in Elevator #"
         << elevator->getCarNum() << " at [timestep : " << timestep << "].\n" << endl;
-        
+
+        elevator-> close_door(NONE, timestep);
         elevator->ready_to_move(0, timestep);
         return true;
     }

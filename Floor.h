@@ -15,7 +15,6 @@ class Floor
 
         void add_passenger(Passenger*);
         void remove_passenger(Passenger*);
-        void set_waiting_dir(string);
         void handle_floor_button(string);
         void floor_button_off(string);
         void detect_me(Elevator*, int);
@@ -33,5 +32,7 @@ class Floor
         FloorButton* floorButtons[2];
         PassengerList* passengers;
         ECS* ecs;
+
+        void set_waiting_dir(string);
 };
 #endif

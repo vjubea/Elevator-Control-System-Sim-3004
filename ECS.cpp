@@ -56,13 +56,18 @@ void ECS::serve_request(int reqFloorNum) {
     }
 }
 
-void ECS::detect_power_out() {
+void ECS::detect_power_out(int timestep) {
+    // Simulates backup power being turned on
+    underPowerOut = true;
+
+    cout << "ECS DETECTED POWER OUT at [timestep : " << timestep << "]\n" << endl;
     for (int i = 0; i < numElevators; i++) {
         elevators[i]->move_to_safe_floor();
     }
 }
-void ECS::detect_fire() {
-    if (contact_fire_department() == true)
+void ECS::detect_fire(int timestep) {
+    cout << "ECS DETECTED FIRE at [timestep : " << timestep << "]\n" << endl;
+    if (contact_fire_department(timestep) == true)
         cout << "Fire Department responded to the call. Currently Underway."
         << "\n" << endl;
 
@@ -71,8 +76,9 @@ void ECS::detect_fire() {
     }
 }
 
-bool ECS::contact_fire_department() {
-    cout << "ECS is contacting the closest Fire Department." << "\n"<< endl;
+bool ECS::contact_fire_department(int timestep) {
+    cout << "ECS is contacting the closest Fire Department at [timestep : "
+         << timestep << "]\n" << endl;
     return true;
 }
 

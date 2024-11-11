@@ -121,17 +121,19 @@ void Elevator::open_door(int timestep) {
     }
 }
 void Elevator::close_door(int numObs, int timestep) {
-    for (int i = 0; i < numObs; i++) {
+    if (!door->isClosed()) {
+        for (int i = 0; i < numObs; i++) {
+            bell->ring();
+            door->close();
+            cout << "Elevator #" << carNum << " TRIES CLOSING its DOOR."
+                 <<"\n" << endl;
+            obstacle_detected(timestep);
+        }
         bell->ring();
         door->close();
-        cout << "Elevator #" << carNum << " TRIES CLOSING its DOOR."
-             <<"\n" << endl;
-        obstacle_detected(timestep);
+        cout << "Elevator #" << carNum << " CLOSED its DOOR"
+             <<".\n" << endl;
     }
-    bell->ring();
-    door->close();
-    cout << "Elevator #" << carNum << " CLOSED its DOOR"
-         <<".\n" << endl;
 }
 
 void Elevator::update_to(int floorNum) {
@@ -144,9 +146,10 @@ void Elevator::update_to(int floorNum) {
 void Elevator::move_to_safe_floor() {
     currDirection = DOWN;
     for (int i = 0; i < passengers->getNumPassengers(); i++) {
-        passengers->get_at(i)->move_to_safety(0, DOWN);
+        passengers->get_at(i)->move_to_safety(SAFE_FLOOR_NUM, DOWN);
     }
-    floorRequests->prioritize_safety(0);
+    floorRequests->prioritize_safety(SAFE_FLOOR_NUM);
+    make_decision();
 }
 
 bool Elevator::contact_building_safety(int timestep) {
@@ -181,7 +184,7 @@ bool Elevator::obstacle_detected(int timestep) {
     display->play_dialog(DOOR_OBST_DETECTED_WARNING);
     return true;
 }
-
+bool Elevator::door_is_open() { return !(door->isClosed()); }
 Floor* Elevator::getCurrFloor() { return currFloor; }
 string Elevator::getCurrDirection() { return currDirection; }
 float Elevator::getCurrWeight() { return passengers->get_total_weight(); }

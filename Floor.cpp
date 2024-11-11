@@ -13,7 +13,11 @@ Floor::Floor(int num, ECS* elCtrlSys) {
     passengers = new PassengerList();
     ecs = elCtrlSys;
 }
-Floor::~Floor() {}
+Floor::~Floor() {
+    delete floorButtons[0];
+    delete floorButtons[1];
+    delete passengers;
+}
 
 void Floor::handle_floor_button(string dir) {
     if (dir == UP)
@@ -96,7 +100,7 @@ Elevator* Floor::get_corresponding_el(string passengerDir) {
         string currDirection = currEl->getCurrDirection();
 
         // Check if the elevator is at this floor
-        if (currFloorNum == floorNum) {
+        if (currFloorNum == floorNum && currEl->door_is_open()) {
             // If direction matches or elevator is idle, return the elevator
             if (currDirection == passengerDir || currDirection == IDLE) {
                 return currEl;

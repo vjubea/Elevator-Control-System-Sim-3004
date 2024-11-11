@@ -9,7 +9,11 @@ ElevatorDisplay::ElevatorDisplay(int carNum, int currFloor, string dir) {
         elButton[i] = new ElevatorDestButton(i+1, elCarNum);
     }
 }
-ElevatorDisplay::~ElevatorDisplay() {}
+ElevatorDisplay::~ElevatorDisplay() {
+    for (int i=0; i<FLOOR_COUNT; i++) {
+        delete elButton[i];
+    }
+}
 
 // Button Interactions
 void ElevatorDisplay::dest_button_pressed(int num) {
@@ -44,8 +48,3 @@ void ElevatorDisplay::update_floor_and_dir(int floorN, string dir) {
 // Getters
 int ElevatorDisplay::getCurrFloor() { return currFloorNum; }
 string ElevatorDisplay::getCurrDir() { return currDirection; }
-bool ElevatorDisplay::isDestButtonOn(int num) {
-    if (0 < num && num <= FLOOR_COUNT)
-       return elButton[num]->isOn();
-    return false;
-}

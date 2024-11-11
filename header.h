@@ -8,6 +8,7 @@
 #define FLOOR_COUNT 5
 #define ELEV_MAX_WEIGHT 360
 #define START_FLOOR_IND 0
+#define SAFE_FLOOR_NUM 1
 #define NONE 0
 
 #define UP "UP"
