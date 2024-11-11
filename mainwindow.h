@@ -48,7 +48,7 @@ private:
     Floor* startFloor;
 
     QTimer *timer;
-    int timestep;;
+    int timestep;
 
     void allow_passenger_action(PassengerList*, int&);
     void simulateElMovement(ECS*, FloorList*, int&);

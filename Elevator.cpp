@@ -39,36 +39,28 @@ void Elevator::remove_passenger(Passenger* p) {
 
 void Elevator::new_request(int floorNum) {
     floorRequests->add_request(floorNum);
-    int currFloorNum = getCurrFloor()->getFloorNum();
-    if (currDirection == IDLE) {
-        if (currFloorNum < floorNum)
-            currDirection = UP;
-        else if (floorNum < currFloorNum)
-            currDirection = DOWN;
-    }
+    make_decision();
 }
 void Elevator::dest_button_pressed(int destFloorNum) {
     display->dest_button_pressed(destFloorNum);
     new_request(destFloorNum);
+    make_decision();
 }
 
 bool Elevator::make_decision() {
     // Sets Elevator's Direction for next move
     int currFloorNum = currFloor->getFloorNum();
-    int nextFloorNum = floorRequests->get_next_floor_to_serve(currFloorNum, currDirection);
+    int reqFloorNum = floorRequests->get_next_floor_to_serve(currFloorNum, currDirection);
     // No requests served currently
-    if (nextFloorNum == NONE) {
+    if (reqFloorNum == NONE) {
         currDirection = IDLE;
         return false;
     }
-    else if (nextFloorNum < currFloorNum) {
+    else if (reqFloorNum < currFloorNum) {
         currDirection = DOWN;
     }
-    else if (nextFloorNum > currFloorNum) {
+    else if (reqFloorNum > currFloorNum) {
         currDirection = UP;
-    }
-    else {
-        currDirection = IDLE;
     }
     return true;
 }
@@ -79,21 +71,25 @@ bool Elevator::ready_to_move(int numObs, int timestep) {
 }
 
 void Elevator::reached_floor(Floor* fl, int timestep) {
+    if (currFloor->getFloorNum() != fl->getFloorNum()) {
+        cout << "Elevator #" << carNum << " moved from Floor #" << currFloor->getFloorNum()
+             << " to Floor #" << fl->getFloorNum() 
+             << " at [timestep : " << timestep << "].\n" << endl;
+        update_to(fl->getFloorNum());
+    }
     // Elevator can access next floor
+    int prevFloorNum = currFloor->getFloorNum();
     currFloor = fl;
+    int currFloorNum = fl->getFloorNum();
 
     // Finds the floor number of the request being served
     int reqFloorNum = floorRequests->
-        get_next_floor_to_serve(currFloor->getFloorNum(), currDirection);
+        get_next_floor_to_serve(currFloorNum, currDirection);
 
     // Checks if a destined floor was reached
-    if (currFloor->getFloorNum() == reqFloorNum) {
-        if (currFloor->getFloorNum() != fl->getFloorNum()) {
-
-            cout << "Elevator #" << carNum << " moved from Floor #" << currFloor->getFloorNum()
-                 << " to Floor #" << fl->getFloorNum() << ".\n" << endl;
-            
-            update_to(fl->getFloorNum());
+    if (currFloorNum == reqFloorNum) {
+        // Checks if the previous Floor is not current one
+        if (currFloorNum != prevFloorNum) {
             display->dest_button_off(reqFloorNum);
             stop();
         }
@@ -103,10 +99,10 @@ void Elevator::reached_floor(Floor* fl, int timestep) {
         open_door(timestep);
         // Removes serviced floor from floorRequests
         floorRequests->remove_request(reqFloorNum);
+        if (currFloorNum == 1 | currFloorNum == FLOOR_COUNT | floorRequests->isEmpty()) {
+            currDirection = IDLE;
+        }
         // Passengers allowed to  board and unboard after
-    }
-    if (floorRequests->isEmpty()) {
-        currDirection = IDLE;
     }
 }
 
@@ -134,7 +130,7 @@ void Elevator::close_door(int numObs, int timestep) {
     }
     bell->ring();
     door->close();
-    cout << "Elevator #" << carNum << " CLOSED ITS DOOR."
+    cout << "Elevator #" << carNum << " CLOSED its DOOR"
          <<".\n" << endl;
 }
 

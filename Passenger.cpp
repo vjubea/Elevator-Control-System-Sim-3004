@@ -8,12 +8,14 @@ Passenger::Passenger(string n, float weight, Floor* startFloor, int destFloor,
     name = n;
     totalWeight = weight;
     destinedFloor = destFloor;
+
     if (destFloor > startFloor->getFloorNum())
         heading = UP;
     else if (destFloor < startFloor->getFloorNum())
         heading = DOWN;
     else
         heading = REACHED_DEST;
+
     floor = startFloor;
     elevator = nullptr;
 
@@ -83,9 +85,8 @@ bool Passenger::press_help_button(int timestep) {
     return false;
 }
 
-void Passenger::board_elevator(int timestep) {
+void Passenger::board_elevator(Elevator* el, int timestep) {
     // Handles whole boarding process
-    Elevator* el = floor->get_corresponding_el(heading);
     if (el != nullptr) {
         cout << name << " is boarding Elevator #" << el->getCarNum()
              << " at [timestep : " << timestep << "].\n" << endl;
@@ -102,11 +103,11 @@ void Passenger::board_elevator(int timestep) {
             cout << name << " unboards Elevator #" << el->getCarNum()
                  << " and returns to Floor #" << floor->getFloorNum()
                  << " because of OVERLOAD.\n" << endl;
+            el->remove_passenger(this);
+            if (totalWeight >= el->getMaxWeight()) {
+                heading = REACHED_DEST;
+            }
         }
-    }
-    else {
-        cout << name << " is waiting for another Elevator"
-             << " at [timestep : " << timestep << "].\n" << endl;
     }
 }
 void Passenger::unboard_elevator(int timestep) {

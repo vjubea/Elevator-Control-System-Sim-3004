@@ -8,8 +8,14 @@ FloorRequests::FloorRequests() : numRequests(0) {
 FloorRequests::~FloorRequests() {}
 
 void FloorRequests::add_request(int floorNum) {
-    if (numRequests < FLOOR_COUNT) {
-        requests[numRequests++] = floorNum;
+    if (numRequests < FLOOR_COUNT && floorNum > 0 && floorNum <= FLOOR_COUNT) {
+        for (int i = 0; i < numRequests; i++) {
+            // Does not add duplicates
+            if (requests[i] == floorNum)
+                return;
+        }
+        requests[numRequests] = floorNum;
+        numRequests++;
     }
 }
 void FloorRequests::remove_request(int floorNum) {
@@ -33,22 +39,37 @@ int FloorRequests::get_next_floor_to_serve(int elFloorNum, string elDir) {
     int minFloorDiff = FLOOR_COUNT;
     int currReqFloorNum;
 
-    for (int i=0; i<numRequests; i++) {
+    // If the elevator is idle, return the first request
+    if (elDir == IDLE && numRequests > 0) {
+        return requests[0];
+    }
+
+    for (int i = 0; i < numRequests; i++) {
         currReqFloorNum = requests[i];
+        // The next floor is the current Floor
+        if (elFloorNum == currReqFloorNum)
+            return currReqFloorNum;
+
+        bool isEligible = false;
         if (elDir == UP) {
-            if (currReqFloorNum >= elFloorNum && currReqFloorNum - elFloorNum < minFloorDiff) {
-                minFloorDiff = currReqFloorNum - elFloorNum;
-                nextFloor = requests[i];
+            // Serve request if it's above the current floor
+            if (currReqFloorNum >= elFloorNum) {
+                isEligible = true;
             }
         }
         else if (elDir == DOWN) {
-            if (elFloorNum >= currReqFloorNum && elFloorNum - currReqFloorNum < minFloorDiff) {
-                minFloorDiff = elFloorNum - currReqFloorNum;
-                nextFloor = requests[i];
+            // Serve request if it's below the current floor
+            if (currReqFloorNum <= elFloorNum) {
+                isEligible = true;
             }
         }
-        else if (elDir == IDLE && numRequests > 0) {
-            return requests[0];
+        // If the request is eligible, check the floor difference
+        if (isEligible) {
+            int floorDiff = abs(currReqFloorNum - elFloorNum);
+            if (floorDiff < minFloorDiff) {
+                minFloorDiff = floorDiff;
+                nextFloor = currReqFloorNum;
+            }
         }
     }
     return nextFloor;

@@ -23,31 +23,35 @@ void ECS::set_elevator_start_floor(int numEls, Floor* initFloor) {
 void ECS::serve_request(int reqFloorNum) {
     if (reqFloorNum < 0 || FLOOR_COUNT < reqFloorNum)
         return;
-    
+
+    bool served = false; // indicates if an elevator got new request
+    Elevator* bestEl = nullptr;
+
     // Decide which car should serve floor request
-    bool served = false;
     for (int i = 0; i < numElevators; i++) {
         Elevator* el = getElevator(i);
         int elCurrFloorNum = el->getCurrFloor()->getFloorNum();
         string elCurrDir = el->getCurrDirection();
 
-        if (elCurrDir == IDLE) {
-            getElevator(i)->new_request(reqFloorNum);
+        if (elCurrFloorNum < reqFloorNum && (elCurrDir == UP || elCurrDir == IDLE)) {
+            el->new_request(reqFloorNum);
             served = true;
             break;
         }
-        else if (elCurrFloorNum < reqFloorNum && el->getCurrDirection() == UP) {
-            getElevator(i)->new_request(reqFloorNum);
+        else if (reqFloorNum < elCurrFloorNum && (elCurrDir == DOWN || elCurrDir == IDLE)) {
+            el->new_request(reqFloorNum);
             served = true;
             break;
         }
-        else if (reqFloorNum < elCurrFloorNum && el->getCurrDirection() == DOWN) {
-            getElevator(i)->new_request(reqFloorNum);
-            served = true;
-            break;
+        else if (elCurrDir == IDLE && bestEl == nullptr) {
+            bestEl = el;
         }
     }
-    if (!served && numElevators >= 1) {
+    if (bestEl != nullptr && !served) {
+        bestEl->new_request(reqFloorNum);
+    }
+    // If no suitable elevator found
+    else if (!served && numElevators >= 1) {
         getElevator(0)->new_request(reqFloorNum);
     }
 }

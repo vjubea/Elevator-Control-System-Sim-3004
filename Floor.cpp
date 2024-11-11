@@ -55,6 +55,7 @@ void Floor::floor_button_off(string dir) {
 }
 
 void Floor::detect_me(Elevator* el, int timestep) {
+    // Floor detects the elevator, then updates its Floor Button.
     cout << "Floor #" << floorNum << " SENSORS detected Elevator Car #"
          << el->getCarNum() << ".\n" << endl;
 
@@ -80,19 +81,29 @@ void Floor::detect_me(Elevator* el, int timestep) {
     if (!floorButtons[0]->isOn() && !floorButtons[1]->isOn())
         pending = false;
 
+    // Delegates next actions to elevator
     el->reached_floor(this, timestep);
 }
 
 Elevator* Floor::get_corresponding_el(string passengerDir) {
     for (int i = 0; i < ELEVATOR_COUNT; i++) {
         Elevator* currEl = ecs->getElevator(i);
-        if (currEl == nullptr)
-            continue; // Skip invalid elevators
-        else if (currEl->getCurrDirection() == passengerDir)
-            return currEl;
-        else if (currEl->getCurrDirection() == IDLE)
-            return currEl;
+        if (!currEl) {
+            throw invalid_argument("ECS has no Elevator at elevators[" + to_string(i) + "]");
+        }
+        // Get the current floor number and direction for easier access
+        int currFloorNum = currEl->getCurrFloor()->getFloorNum();
+        string currDirection = currEl->getCurrDirection();
+
+        // Check if the elevator is at this floor
+        if (currFloorNum == floorNum) {
+            // If direction matches or elevator is idle, return the elevator
+            if (currDirection == passengerDir || currDirection == IDLE) {
+                return currEl;
+            }
+        }
     }
+    // No matching elevator found
     return nullptr;
 }
 int Floor::getFloorNum() { return floorNum; }

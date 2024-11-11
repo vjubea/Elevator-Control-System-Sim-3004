@@ -15,7 +15,7 @@ class Passenger
         ~Passenger();
 
         // Board/Unboard function
-        void board_elevator(int);
+        void board_elevator(Elevator*, int);
         void unboard_elevator(int);
         void move_to_safety(int, string);
         void no_more_obstructs();
