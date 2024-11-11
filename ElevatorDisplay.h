@@ -22,7 +22,6 @@ class ElevatorDisplay
         int getCurrFloor();
         string getCurrDir();
         bool isDestButtonOn(int);
-        
 
     private:
         int elCarNum;

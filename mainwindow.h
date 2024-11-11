@@ -28,6 +28,9 @@ private:
     Ui::MainWindow *ui;
     QPushButton *startButton;
     QPushButton *addPassengerButton;
+    QPushButton *powerOutButton;
+    QPushButton *fireDetectedButton;
+
     QTextEdit *passengerListDisplay;
     QTextEdit *elevatorDisplay;
 
@@ -56,8 +59,10 @@ private:
     void updateUI();
 
 private slots:
-    void on_startButton_clicked();
     void on_addPassengerButton_clicked();
+    void on_startButton_clicked();
+    void on_powerOutButton_clicked();
+    void on_fireDetectedButton_clicked();
     void updateSimulation();
 };
 #endif // MAINWINDOW_H

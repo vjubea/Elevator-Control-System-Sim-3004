@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QVBoxLayout>
 #include <QStringList>
+#include <QHBoxLayout>
 #include "ECS.h"
 #include "FloorList.h"
 
@@ -14,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) // Put other input in here
     // Setup UI elements
     startButton = new QPushButton("Start Simulation", this);
     addPassengerButton = new QPushButton("Add Passenger", this);
+    powerOutButton = new QPushButton("Power Out", this);
+    fireDetectedButton = new QPushButton("Fire Detected", this);
     passengerListDisplay = new QTextEdit(this);
     passengerListDisplay->setReadOnly(true);
     elevatorDisplay = new QTextEdit(this);
@@ -63,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) // Put other input in here
     // Initializes elevators with their start floor
     ecs->set_elevator_start_floor(ELEVATOR_COUNT, startFloor);
 
+
     // Layout
     QVBoxLayout *layout = new QVBoxLayout;
     // Passenger Inputs
@@ -79,14 +83,26 @@ MainWindow::MainWindow(QWidget *parent) // Put other input in here
     layout->addWidget(addPassengerButton);
     layout->addWidget(passengerListDisplay);
     layout->addWidget(elevatorDisplay);
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(powerOutButton);
+    buttonLayout->addWidget(fireDetectedButton);
+    layout->addLayout(buttonLayout);
+
+    powerOutButton->hide();
+    fireDetectedButton->hide();
+
     layout->addWidget(startButton);
 
     centralWidget = new QWidget(this);
     centralWidget->setLayout(layout);
     setCentralWidget(centralWidget);
+
     // Connect signals to slots
-    connect(startButton, SIGNAL(clicked()), this, SLOT(on_startButton_clicked()));
     connect(addPassengerButton, SIGNAL(clicked()), this, SLOT(on_addPassengerButton_clicked()));
+    connect(startButton, SIGNAL(clicked()), this, SLOT(on_startButton_clicked()));
+    connect(powerOutButton, SIGNAL(clicked()), this, SLOT(on_powerOutButton_clicked()));
+    connect(fireDetectedButton, SIGNAL(clicked()), this, SLOT(on_fireDetectedButton_clicked()));
 
     // Initialize the timer
     timer = new QTimer(this);
@@ -140,6 +156,7 @@ void MainWindow::on_addPassengerButton_clicked()
         Passenger* p = new Passenger(name, weight, pFloor, destFloorNum, floorButT, openT, closeT, helpT, numObs);
         passengers->add_passenger(p);
         pFloor->add_passenger(p);
+        pFloor = nullptr;
 
         // Clear input fields
         passengerNameInput->clear();
@@ -169,9 +186,22 @@ void MainWindow::on_startButton_clicked() {
     pressHelpTimeInput->hide();
     passengerNumObstructsInput->hide();
     addPassengerButton->hide();
-
+    powerOutButton->show();
+    fireDetectedButton->show();
     // Start the simulation timer
     timer->start(3000);
+}
+
+void MainWindow::on_powerOutButton_clicked() {
+    passengerListDisplay->append("Power out detected!");
+    ecs->detect_power_out(timestep);
+    timer->start(1000);
+}
+
+void MainWindow::on_fireDetectedButton_clicked() {
+    passengerListDisplay->append("Fire detected!");
+    ecs->detect_fire(timestep);
+    timer->start(1000);
 }
 
 void MainWindow::updateUI() {
@@ -239,15 +269,16 @@ void MainWindow::simulateElBoardUnboard(ECS* ecs, int &timestep) {
 
         // Allow Passengers to Unboard Elevator
         Floor* elCurrFloor = el->getCurrFloor();
-        Passenger* nextUnboarding = nullptr;
-        do {
-            // Checks current elevator passengers
-            nextUnboarding = el->getPassengers()->get_next_unboarding(elCurrFloor->getFloorNum());
-            if (nextUnboarding != nullptr) {
-                nextUnboarding->unboard_elevator(timestep);
-            }
-        } while (nextUnboarding != nullptr);
-
+        if (el->door_is_open()) {
+            Passenger* nextUnboarding = nullptr;
+            do {
+                // Checks current elevator passengers
+                nextUnboarding = el->getPassengers()->get_next_unboarding(elCurrFloor->getFloorNum());
+                if (nextUnboarding != nullptr) {
+                    nextUnboarding->unboard_elevator(timestep);
+                }
+            } while (nextUnboarding != nullptr);
+        }
         // Allow Passengers to Board Elevator
         Passenger* passenger;
         string p_heading;
@@ -265,6 +296,9 @@ void MainWindow::simulateElBoardUnboard(ECS* ecs, int &timestep) {
 
             // Check if passenger needs this Elevator
             Elevator* corrEl = elCurrFloor->get_corresponding_el(p_heading);
+            if (corrEl == nullptr)
+                continue;
+
             if (corrEl->getCurrFloor()->getFloorNum() == passenger->getFloor()->getFloorNum()) {
                 passenger->board_elevator(corrEl, timestep);
 
@@ -278,16 +312,27 @@ void MainWindow::simulateElBoardUnboard(ECS* ecs, int &timestep) {
     }
 }
 void MainWindow::updateSimulation() {
-    updateUI(); // Update the UI with the current simulation state
-    // Simulation Loop
-    // TODO: Finish Safety and Timestep System
-    // TODO: Take video of 7 scenarios
+    // Update the UI with the current simulation state
+    updateUI();
+
+    // Simulation Condition
     if (passengers->all_reached_dest()) {
         timer->stop();
         passengerListDisplay->append("Simulation completed.");
+
+        // Deleting uneeded resources
+        startFloor = nullptr;
+        for (int i = 0; i < passengers->getNumPassengers(); i++)
+            delete passengers->get_at(i);
+        delete passengers;
+        for (int i = floorList->getNumFloors() - 1; i >= 0; i--)
+            delete floorList->get(i); // Handles delete
+        delete floorList;
+        delete ecs;
+
         return;
     }
-    // Run simulation for one timestep
+    // Run simulation once (5 timesteps)
     allow_passenger_action(passengers, timestep);
     simulateElMovement(ecs, floorList, timestep);
     allow_passenger_action(passengers, timestep);
