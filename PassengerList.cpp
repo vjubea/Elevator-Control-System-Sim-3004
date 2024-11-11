@@ -48,9 +48,9 @@ bool PassengerList::all_reached_dest() {
     return true;
 }
 
-Passenger* PassengerList::get_next_unboarding(int currFloor) {
+Passenger* PassengerList::get_next_unboarding(int currFloorNum) {
     for (int i = 0; i < numPassengers; i++) {
-        if (passengers[i]->getDestination() == currFloor) {
+        if (passengers[i]->getDestination() == currFloorNum) {
             return passengers[i];
         }
     }

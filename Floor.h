@@ -19,8 +19,8 @@ class Floor
         void handle_floor_button(string);
         void floor_button_off(string);
         void detect_me(Elevator*, int);
-        Elevator* get_corresponding_el(string);
 
+        Elevator* get_corresponding_el(string);
         int getFloorNum();
         int getNumPassengers();
         PassengerList* getPassengers();

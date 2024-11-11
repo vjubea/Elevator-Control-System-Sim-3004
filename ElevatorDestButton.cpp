@@ -8,15 +8,15 @@ ElevatorDestButton::ElevatorDestButton(int floorN, int carNum) {
 ElevatorDestButton::~ElevatorDestButton() {}
 
 void ElevatorDestButton::turn_on() {
-    cout << "Floor #" << floorNum
-    << " Destination Button is toggled ON in Elevator #"<< elNum
-    << ".\n" << endl;
+    cout << "Destination Button #" << floorNum
+         << " is toggled ON in Elevator #"<< elNum
+         << ".\n" << endl;
     on = true;
 }
 void ElevatorDestButton::turn_off() {
-    cout << "Floor #" << floorNum
-    << " Destination Button is toggled OFF in Elevator #"<< elNum
-    << ".\n" << endl;
+    cout << "Destination Button " << floorNum
+         << "is toggled OFF in Elevator #"<< elNum
+         << ".\n" << endl;
     on = false;
 }
 

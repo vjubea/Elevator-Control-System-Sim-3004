@@ -103,7 +103,7 @@ void MainWindow::on_addPassengerButton_clicked()
     QString n, w, sfn, dfn;
     string name = n.toStdString();
     float weight;
-    int startFloorNum, destFloorNum, floorButT = 0;
+    int startFloorNum, destFloorNum, floorButT, openT, closeT, helpT, numObs = 0;
     bool ok = true;
 
     n = passengerNameInput->text();
@@ -118,19 +118,17 @@ void MainWindow::on_addPassengerButton_clicked()
     destFloorNum = dfn.toInt(&ok);
     if (!ok) return;
     floorButT = pressFloorButTimeInput->text().toInt(&ok);
-    if (!ok) return;
-    /*
+    if (!pressFloorButTimeInput->text().isEmpty() && !ok) return;
     openT = pressOpenTimeInput->text().toInt(&ok);
-    if (!ok) return;
+    if (!pressOpenTimeInput->text().isEmpty() && !ok) return;
     closeT = pressCloseTimeInput->text().toInt(&ok);
-    if (!ok) return;
+    if (!pressCloseTimeInput->text().isEmpty() && !ok) return;
     helpT = pressHelpTimeInput->text().toInt(&ok);
-    if (!ok) return;
+    if (!pressHelpTimeInput->text().isEmpty() && !ok) return;
     numObs = passengerNumObstructsInput->text().toInt(&ok);
-    if (!ok) return;
-    */
-    Floor* pFloor = floorList->get(startFloorNum-1);
+    if (!passengerNumObstructsInput->text().isEmpty() && !ok) return;
 
+    Floor* pFloor = floorList->get(startFloorNum-1);
     if (!n.isEmpty() && !w.isEmpty() && !sfn.isEmpty() && !dfn.isEmpty() && pFloor!= nullptr) {
         QString passengerInfo =
                 "Passenger: " + n +
@@ -138,9 +136,10 @@ void MainWindow::on_addPassengerButton_clicked()
                 " | Start Floor: " + sfn +
                 " | Destination Floor: " + dfn;
         passengerListDisplay->append(passengerInfo);
-        Passenger* p = new Passenger(name, weight, pFloor, destFloorNum, floorButT, NONE, NONE, NONE, NONE);
+
+        Passenger* p = new Passenger(name, weight, pFloor, destFloorNum, floorButT, openT, closeT, helpT, numObs);
         passengers->add_passenger(p);
-        startFloor->add_passenger(p);
+        pFloor->add_passenger(p);
 
         // Clear input fields
         passengerNameInput->clear();
@@ -159,27 +158,40 @@ void MainWindow::on_startButton_clicked() {
         return;
 
     passengerListDisplay->append("\nStarting simulation...");
+    // Hide input fields
+    passengerNameInput->hide();
+    passengerWeightInput->hide();
+    startFloorInput->hide();
+    destinationFloorInput->hide();
+    pressFloorButTimeInput->hide();
+    pressOpenTimeInput->hide();
+    pressCloseTimeInput->hide();
+    pressHelpTimeInput->hide();
+    passengerNumObstructsInput->hide();
+    addPassengerButton->hide();
+
     // Start the simulation timer
     timer->start(3000);
 }
 
 void MainWindow::updateUI() {
-
     elevatorDisplay->clear();
+    elevatorDisplay->append("Timestep : " + QString::number(timestep));
     for (size_t i = 0; i < ELEVATOR_COUNT; i++) {
         Elevator* el = ecs->getElevator(i);
         QString elevatorInfo =
                 "Elevator # " + QString::number(el->getCarNum()) +
                 " | Curr Floor # " + QString::number(el->getCurrFloor()->getFloorNum()) +
                 " | State: " +
-                (el->getCurrDirection() != IDLE ? "Moving " + QString::fromStdString(el->getCurrDirection()): "IDLE");
+                (el->getCurrDirection() != IDLE ? "Moving " + QString::fromStdString(el->getCurrDirection()): "IDLE") +
+                " | Passengers: " + QString::number(el->getPassengers()->getNumPassengers());
         elevatorDisplay->append(elevatorInfo);
     }
 }
 
 void MainWindow::allow_passenger_action(PassengerList* pList, int &timestep) {
     timestep++;
-    Passenger* passenger =  nullptr;
+    Passenger* passenger = nullptr;
     for (int i = 0; i < pList->getNumPassengers(); ++i) {
         passenger = pList->get_at(i);
         if (timestep == passenger->getPressFloorButT()) {
@@ -204,7 +216,6 @@ void MainWindow::simulateElMovement(ECS* ecs, FloorList* floorList, int &timeste
     for (int i = 0; i < ELEVATOR_COUNT; i++) {
         el = ecs->getElevator(i);
         elCurrFloorNum = el->getCurrFloor()->getFloorNum();
-
         if (el->getCurrDirection() == UP && elCurrFloorNum < floorList->getNumFloors()) {
             floorList->get(elCurrFloorNum)->detect_me(el, timestep); // check these
         }
@@ -212,7 +223,7 @@ void MainWindow::simulateElMovement(ECS* ecs, FloorList* floorList, int &timeste
             floorList->get(elCurrFloorNum-2)->detect_me(el, timestep); // check these
         }
         else {
-            cout << "Elevator #" << el->getCarNum() << " is IDLE"
+            cout << "Elevator #" << el->getCarNum() << " stays IDLY"
                  << " on Floor #" << elCurrFloorNum << ".\n" << endl;
             floorList->get(elCurrFloorNum-1)->detect_me(el, timestep);
         }
@@ -233,31 +244,34 @@ void MainWindow::simulateElBoardUnboard(ECS* ecs, int &timestep) {
             // Checks current elevator passengers
             nextUnboarding = el->getPassengers()->get_next_unboarding(elCurrFloor->getFloorNum());
             if (nextUnboarding != nullptr) {
-                // Issue happens after
                 nextUnboarding->unboard_elevator(timestep);
             }
         } while (nextUnboarding != nullptr);
 
         // Allow Passengers to Board Elevator
-        Passenger* passenger = nullptr;
-        string p_heading = "";
+        Passenger* passenger;
+        string p_heading;
         int numObs = 0;
 
         for (int i = 0; i < elCurrFloor->getNumPassengers(); i++) {
             passenger = elCurrFloor->getPassengers()->get_at(i);
             if (passenger == nullptr) {
                 qInfo("CPP_ERR: Passenger was found empty");
+                continue;
             }
             p_heading = passenger->getHeading();
-            if (p_heading == REACHED_DEST || p_heading == "")
+            if (p_heading == REACHED_DEST)
                 continue;
 
-            if (p_heading == el->getCurrDirection() || el->getCurrDirection() == IDLE) {
-                passenger->board_elevator(timestep);
-            }
-            if (passenger->getNumObstructs() > 0) {
-                numObs += passenger->getNumObstructs();
-                passenger->no_more_obstructs();
+            // Check if passenger needs this Elevator
+            Elevator* corrEl = elCurrFloor->get_corresponding_el(p_heading);
+            if (corrEl->getCurrFloor()->getFloorNum() == passenger->getFloor()->getFloorNum()) {
+                passenger->board_elevator(corrEl, timestep);
+
+                if (passenger->getNumObstructs() > 0) {
+                    numObs += passenger->getNumObstructs();
+                    passenger->no_more_obstructs();
+                }
             }
         }
         el->ready_to_move(numObs, timestep);
@@ -266,7 +280,6 @@ void MainWindow::simulateElBoardUnboard(ECS* ecs, int &timestep) {
 void MainWindow::updateSimulation() {
     updateUI(); // Update the UI with the current simulation state
     // Simulation Loop
-    // TODO: Check why Floor Button # is wrong for toggle off
     // TODO: Finish Safety and Timestep System
     // TODO: Take video of 7 scenarios
     if (passengers->all_reached_dest()) {
@@ -276,13 +289,9 @@ void MainWindow::updateSimulation() {
     }
     // Run simulation for one timestep
     allow_passenger_action(passengers, timestep);
-
     simulateElMovement(ecs, floorList, timestep);
-
     allow_passenger_action(passengers, timestep);
-
     simulateElBoardUnboard(ecs, timestep);
-
     allow_passenger_action(passengers, timestep);
 
     timer->start(3000);
