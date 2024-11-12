@@ -293,7 +293,8 @@ void MainWindow::simulateElBoardUnboard(ECS* ecs, int &timestep) {
             p_heading = passenger->getHeading();
             if (p_heading == REACHED_DEST)
                 continue;
-
+            else if (timestep < passenger->getPressFloorButT())
+                continue;
             // Check if passenger needs this Elevator
             Elevator* corrEl = elCurrFloor->get_corresponding_el(p_heading);
             if (corrEl == nullptr)

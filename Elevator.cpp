@@ -62,6 +62,10 @@ bool Elevator::make_decision() {
     else if (reqFloorNum > currFloorNum) {
         currDirection = UP;
     }
+    // Elevator requested on current floor
+    else {
+        currDirection = IDLE;
+    }
     return true;
 }
 bool Elevator::ready_to_move(int numObs, int timestep) {
